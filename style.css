@@ -1,0 +1,74 @@
+.error {color: #FF0000}
+
+* {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 1.05em;
+}
+
+.btn-info, .btn-info:hover {
+    background-color: #0275d8;
+    color: white;
+    padding: 7px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border: 0;
+    border-radius: 5px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 1em;
+    cursor: pointer;
+
+}
+
+.container {
+    background-color: antiquewhite;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-top: 15px;
+}
+
+.g-recaptcha {
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.info-text {
+    color: crimson;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.counter {
+    color:green;
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+}
+
+.text-medium {
+    font-size: 1.25em;
+}

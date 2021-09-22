@@ -1,27 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
-
-tr:nth-child(even) {
-  background-color: #dddddd;
-}
-  </style>
+<link rel="stylesheet" href="style.css">
   <title>Animals</title>
 </head>
 <body>
-<h2>Animals</h2>
+<h2 class="center text-medium">Animals</h2>
 <?php
 $handle = fopen("counter.txt", "r"); 
 if(!$handle) { 
@@ -30,7 +14,7 @@ if(!$handle) {
     $counter =(int )fread($handle,20);
         fclose($handle); 
         $counter++; 
-        echo"Number of visitors so far: ". $counter . "" ; 
+        echo"<span class='counter'>Number of visitors so far: ". $counter . "</span>" ; 
     $handle = fopen("counter.txt", "w" ); 
 
     fwrite($handle,$counter);
@@ -48,6 +32,7 @@ if(!$handle) {
             <option value="10+">10+ years</option>
         </select>
 
+        &nbsp;&nbsp;
         <label for="">Category</label>
         <select name="category" id="lifespan">
             <option value="all" selected value>All</option>
@@ -56,9 +41,11 @@ if(!$handle) {
             <option value="carnivores">carnivores</option>
         </select>
 
-        <br>
-        <br>
-        <input type="submit" value="Submit" name="btn">    
+        &nbsp;&nbsp;
+        <input type="submit" value="Submit" name="btn" class="btn-info">
+
+        &nbsp;&nbsp;
+        <a href="submission.php" class="btn-info">Add New Animal</a> 
     </form>
 
   <table>
@@ -78,6 +65,7 @@ if(!$handle) {
   // Decode the JSON file
   $animals = json_decode($json,true);
 
+
 if(isset($animals)) {
 
 if(isset($_POST['btn'])){
@@ -86,7 +74,7 @@ if(isset($_POST['btn'])){
       if ($animals[$i]['Lifespan'] == $_POST['lifespan'] || $_POST['lifespan'] == "all") {
         echo "<tr>";
         echo "<td>".$animals[$i]['Name']."</td>";
-        echo "<td>".$animals[$i]['Category']."</td>";
+        echo "<td>".ucwords($animals[$i]['Category'])."</td>";
         echo "<td>";
         echo "<img src='upload/".$animals[$i]['Picture']."'"."width='250'>";
         echo "</td>";
@@ -101,7 +89,7 @@ if(isset($_POST['btn'])){
   for ($i = 0; $i < count($animals); $i++) {
     echo "<tr>";
     echo "<td>".$animals[$i]['Name']."</td>";
-    echo "<td>".$animals[$i]['Category']."</td>";
+    echo "<td>".ucwords($animals[$i]['Category'])."</td>";
     echo "<td>";
     echo "<img src='upload/".$animals[$i]['Picture']."'"."width='250'>";
     echo "</td>";

@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-        .error {color: #FF0000}
-    </style>
-    <title>Form</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Submit Animal Info</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
 <?php
 // define variables and set to empty values
-$nameError = $categoryError = $pictureError = $lifespanError = $bioError = $ansError = "";
+$nameError = $categoryError = $pictureError = $lifespanError = $bioError = $ansError = $recaptchaMsg = $errors = "";
 $name = $category = $picture = $lifespan = $bio = $ans = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -50,7 +49,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ans = test_input($_POST["ans"]);
     }
 
-    // echo gettype((int)$_POST["ans"]);
+
+	$response = $_POST["g-recaptcha-response"];
+	$url = 'https://www.google.com/recaptcha/api/siteverify';
+	$data = array(
+		'secret' => '6LfugYMcAAAAAOBWcEn4z4om7hGSQWnDqLfKavQM',
+		'response' => $response
+	);
+	$options = array(
+		'http' => array (
+			'method' => 'POST',
+			'content' => http_build_query($data),
+            'header' => "Content-Type: application/x-www-form-urlencoded"
+		)
+	);
+	$context  = stream_context_create($options);
+	$verify = file_get_contents($url, false, $context);
+	$captcha_success=json_decode($verify);
+
+	if ($captcha_success->success==false) {
+		$recaptchaMsg = "Sorry! We couldn't verify that you're not a bot!";
+        echo "<span class='info-text'>Please make sure to complete recaptcha properly.</span><br>";
+        $errors = "Error";
+	}
+
+    if(isset($_POST['btn'])){
+        $img_loc =$_FILES['picture']['tmp_name'];
+        $image_name = $_FILES['picture']['name'];
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $moved = move_uploaded_file($img_loc,"upload/".$_POST['name'].".".$image_ext);
+        if (!$moved) {
+            echo "<span class='info-text'>Couldn't upload the image.</span><br>";
+            $errors = "Error";
+        }
+    }
+
 
     if($nameError == "" && $categoryError == "" && $pictureError == "" && $lifespanError == "" && $bioError == ""){
         function get_data() {
@@ -71,7 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     'DateTime' => $dateTime
                 );
                 $array_data[]=$extra;
-                // echo "file exist<br/>";
                 return json_encode($array_data);
             }
             else {
@@ -84,33 +116,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     'Bio' => $_POST["bio"],
                     'DateTime' => $dateTime
                 );
-                // echo "file does not exist<br/>";
                 return json_encode($datae);   
             }
         }
-      
+
         $file_name='animals'.'.json';
-          
-        if(file_put_contents("$file_name", get_data())) {
-            echo 'Submit success';
-        }                
-        else {
-            echo 'Submit Failure';                
-        }
-    
-        if(isset($_POST['btn'])){
-            $img_loc =$_FILES['picture']['tmp_name'];
-            $image_name = $_FILES['picture']['name'];
-            $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
-            move_uploaded_file($img_loc,"upload/".$_POST['name'].".".$image_ext);
+
+        if(!file_put_contents("$file_name", get_data())) {
+            echo '<span class="info-text">Submission Failure</span>';
+            $errors = "Error";
         }
 
+        if ($errors) {
+            echo "<span class='info-text'>Submission Failed :(</span><br>";
+            echo '<a href="submission.php" class=".btn-info">Submit Again</a>';
+            die();
+        }
 
-
-        header('Location: animals.php');
-        exit();    
+        if (!$errors) {
+            header('Location: animals.php');
+        }
     }
-
 }
 
 function test_input($data) {
@@ -120,23 +146,25 @@ function test_input($data) {
   return $data;
 }
 ?>
-
-
+<div class="container">
 
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" enctype="multipart/form-data">
-        <h1>Animal Information</h1>
+
+        <h1>Submit New Animal Info</h1> or&nbsp; <a href="animals.php" class="btn-info">View Submitted Animal Info</a> 
         <p><span class="error">* denotes required field</span></p>
         <label for="name">Name of the animal:</label>
         <input type="text" name="name" id="name">
         <span class="error">* <?php echo $nameError;?></span>
 
-        <p>Category</p>
+        <br>
+        <br>
+        <label for="category">Category:</label>
         <input type="radio" name="category" value="herbivores" id="herbivores">
-        <label for="herbivores">herbivores</label>
+        <label for="herbivores">Herbivores</label>
         <input type="radio" name="category" value="omnivores" id="omnivores">
-        <label for="omnivores">omnivores</label>
+        <label for="omnivores">Omnivores</label>
         <input type="radio" name="category" value="carnivores" id="carnivores">
-        <label for="carnivores">carnivores</label>
+        <label for="carnivores">Carnivores</label>
         <span class="error">* <?php echo $categoryError;?></span>
 
         <br>
@@ -159,16 +187,18 @@ function test_input($data) {
         <br>
         <br>
         <label for="bio">Description:</label>
-    
+        <span class="error">* <?php echo $bioError;?></span>
         <br>
         <br>
         <textarea name="bio" id="bio" cols="30" rows="10" placeholder="Description of the animal"></textarea>
-        <span class="error">* <?php echo $bioError;?></span>
+
+
+        <div class="g-recaptcha" data-sitekey="6LfugYMcAAAAAAPAIpGqnHImvFwQh_ZfbQo0W4ik"></div>
 
         <br>
         <br>
-        <input type="submit" value="Submit" name="btn">    
+        <input type="submit" value="Submit" name="btn" class="btn-info">
     </form>
-
+    </div>
 </body>
 </html>
